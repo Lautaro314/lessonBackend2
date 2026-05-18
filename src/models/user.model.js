@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+/*
 const userSchema = new mongoose.Schema({
     email: {
         type: String,
@@ -15,6 +15,21 @@ const userSchema = new mongoose.Schema({
         enum: ["user", "admin"],
         default: "user"
     }
+});
+*/
+const userSchema = new mongoose.Schema({
+
+    email: String,
+
+    password: String,
+
+    role: {
+        type: String,
+        default: "user"
+    },
+
+    googleId: String
+
 });
 
 const UserModel = mongoose.model("User", userSchema);

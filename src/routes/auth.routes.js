@@ -17,5 +17,30 @@ router.get("/products", passport.authenticate("jwt", { session: false }), getPro
 router.get("/current", passport.authenticate("jwt", { session: false }), (req, res) => {
     res.json({ user: req.user })
 })
+router.get("/google",
+
+    passport.authenticate("google", {
+        scope: ["profile", "email"]
+    })
+
+);
+router.get(
+
+    "/google/callback",
+
+    passport.authenticate("google", {
+        failureRedirect: "/login"
+    }),
+
+    (req, res) => {
+
+        res.json({
+            message: "Login con Google exitoso",
+            user: req.user
+        });
+
+    }
+
+);
 
 module.exports = router;

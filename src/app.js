@@ -1,9 +1,11 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const path = require("path");
+const session = require("express-session");
 const authRoutes = require("./routes/auth.routes.js");
 const usersRoutes = require("./routes/users.routes.js")
 require("dotenv").config();
+require("../strategies/google.strategy");
 const connectDB = require("./config/db");
 const passport = require("./config/passport.js")
 const { protectRoute, roleRestriction } = require("./middleware/auth.middleware.js");
@@ -46,7 +48,27 @@ process.env.NODE_ENV = MODE;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(process.env.SECRET));
+app.use(session({
+
+    secret: process.env.SECRET,
+
+    resave: false,
+
+    saveUninitialized: false,
+
+    cookie: {
+
+        httpOnly: true,
+
+        secure: process.env.NODE_ENV === "production",
+
+        sameSite: "lax"
+
+    }
+
+}));
 app.use(passport.initialize());
+app.use(passport.session());
 
 
 // Archivos estáticos
