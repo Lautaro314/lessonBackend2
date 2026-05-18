@@ -1,6 +1,7 @@
 const generateToken = require("../services/user.auth");
 const { hashPassword, comparePassword } = require("../services/bcrypt");
 const UserModel = require("../models/user.model.js");
+const { fork } = require("child_process");
 
 //CON LOGIN ME GENERA EL TOKEN, LO USAMOS EN EL FRONTEND PARA LA PROTECCION DE RUTAS
 const login = async (req, res) => {
@@ -71,5 +72,7 @@ const getProducts = (req, res) => {
         message: `Bienvenido ${req.user.email} a la sección de productos.`
     });
 };
+
+
 
 module.exports = { login, getProducts, register };

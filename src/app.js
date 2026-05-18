@@ -8,10 +8,40 @@ const connectDB = require("./config/db");
 const passport = require("./config/passport.js")
 const { protectRoute, roleRestriction } = require("./middleware/auth.middleware.js");
 const { errorHandler } = require("./middleware/error.middleware.js");
+const productRoutes = require("./routes/products.routes");
+const processRoutes = require("./routes/process.routes");
 
 // Inicialization
 const app = express();
-const PORT = process.env.PORT || 8080;
+
+function getConfig() {
+
+    let mode = process.env.NODE_ENV || "development";
+    let port = process.env.PORT || 8080;
+
+    process.argv.slice(2).forEach(arg => {
+
+        if (arg.startsWith("--port=")) {
+            port = Number(arg.split("=")[1]);
+        }
+
+        if (arg.startsWith("--mode=")) {
+            mode = arg.split("=")[1];
+        }
+
+    });
+
+    return {
+        mode,
+        port
+    };
+}
+
+const config = getConfig();
+const PORT = config.port;
+const MODE = config.mode;
+process.env.NODE_ENV = MODE;
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -28,6 +58,31 @@ app.use(express.static(path.join(__dirname, "public")));
 //endpoints disponibles para el manejo de la sesión 
 app.use("/api/v1/users", usersRoutes)
 app.use("/api/v1/auth", authRoutes);
+
+//endpoint para el uso del miniprograma fork
+app.use("/api/v1/products", productRoutes);
+
+//endpoint para el manejo del proceso
+app.use("/api/v1/process", processRoutes);
+console.log("Servidor iniciando");
+console.log("PID:", process.pid);
+console.log("ENV:", process.env.NODE_ENV);
+
+process.on("SIGINT", () => {
+    console.log("Cerrando servidor...");
+    process.exit();
+});
+
+app.get("/info", (req, res) => {
+
+    res.json({
+        pid: process.pid,
+        env: process.env.NODE_ENV,
+        memory: process.memoryUsage()
+    });
+
+});
+
 
 
 app.get("/admin", protectRoute, roleRestriction(["admin"]), (req, res) => {

@@ -6,18 +6,23 @@ const validateRegister = async (req, res, next) => {
 
     //validar email
     if (!email || typeof email !== "string") {
-        return res.status(400).json({
-            status: 400,
-            error: 'email inválido'
-        });
+        const error = new Error("email inválido");
+        error.code = 400;
+        return next(error)
+    }
+
+    //validación básica de formato email (mejor que nada)
+    if (!email.includes("@")) {
+        const error = new Error("Email debe contener @");
+        error.code = 400;
+        return next(error)
     }
 
     //validar contraseña
     if (!password || typeof password !== "string" || password.length < 4) {
-        return res.status(400).json({
-            status: 400,
-            error: 'Contraseña inválida'
-        });
+        const error = new Error("contraseña inválida (minimo 4 caracteres)");
+        error.code = 400;
+        return next(error)
     }
     next()
 }

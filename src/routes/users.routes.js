@@ -19,11 +19,14 @@ router.post("/", (req, res) => {
     const { name } = req.body;
 
     if (!name) {
-        return res.status(400).send("Error");
+        return res.status(400).json({
+            status: 400,
+            error: "Error"
+        });
     }
 
     users.push({ name });
-    res.send("Usuario creado");
+    res.status(201).json({ message: "Usuario creado" });
 });
 
 module.exports = router;
