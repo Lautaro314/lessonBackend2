@@ -5,7 +5,6 @@ const session = require("express-session");
 const authRoutes = require("./routes/auth.routes.js");
 const usersRoutes = require("./routes/users.routes.js")
 require("dotenv").config();
-require("../strategies/google.strategy");
 const connectDB = require("./config/db");
 const passport = require("./config/passport.js")
 const { protectRoute, roleRestriction } = require("./middleware/auth.middleware.js");
