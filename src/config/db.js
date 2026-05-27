@@ -1,33 +1,51 @@
 const mongoose = require("mongoose");
 
-
 const connectDB = async () => {
+    const uri = process.env.MONGO_URL;
+
+    if (!uri) {
+        console.error("Falta MONGO_URL en el archivo .env");
+        process.exit(1);
+    }
+
     try {
-        await mongoose.connect(process.env.MONGO_URL)
+        await mongoose.connect(uri, {
+            serverSelectionTimeoutMS: 15000,
+            family: 4,
+        });
         console.log("Mongo DB conectado!!");
     } catch (error) {
-        console.error("Error al hacer la conexión", error)
-        process.exit(1)
-    }
-}
+        console.error("\nNo se pudo conectar a MongoDB Atlas.\n");
 
-//Eventos
+        if (error.name === "MongooseServerSelectionError") {
+            console.error("Causa habitual: tu IP no está permitida en Atlas.");
+            console.error("Solución:");
+            console.error("  1. Entrá a https://cloud.mongodb.com");
+            console.error("  2. Network Access → Add IP Address");
+            console.error("  3. Elegí 'Add Current IP Address' (o 0.0.0.0/0 solo para desarrollo)");
+            console.error("  4. Esperá 1–2 minutos y volvé a ejecutar: node src/app.js\n");
+        } else {
+            console.error(error.message);
+        }
+
+        process.exit(1);
+    }
+};
+
 const db = mongoose.connection;
 
 db.on("connected", () => {
-    console.log("Conexión exitósa!")
-})
+    console.log("Conexión exitosa!");
+});
 
 db.on("error", (err) => {
-    console.log("Error en mongo:", err)
-})
+    console.error("Error en mongo:", err.message);
+});
 
 db.on("disconnected", () => {
-    console.warn("Mongo desconectado, intentando reconectar...");
-})
+    if (mongoose.connection.readyState === 0) {
+        console.warn("Mongo desconectado.");
+    }
+});
 
 module.exports = connectDB;
-
-//"mongodb+srv://lautaro:Lauta2399@commercecluster.3i4man4.mongodb.net/sesionesDB"
-
-

@@ -1,22 +1,12 @@
 const jwt = require("jsonwebtoken");
 
+const generateToken = (user) => {
+    const payload = {
+        userId: user._id?.toString() || user.userId,
+        role: user.role || "user",
+    };
 
-const generateToken = (usuario) => {
-    try {
-        const payload = {
-            id: usuario._id,
-            email: usuario.email,
-            role: usuario.role || 'user'
-        };
-        const token = jwt.sign(payload , process.env.JWT_SECRET , {expiresIn: '1h'})
-
-        return token;
-
-    } catch (error) {
-        console.error("Error al generar el Token" , error);
-    }
-
-
-}
+    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+};
 
 module.exports = generateToken;
