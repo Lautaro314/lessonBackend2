@@ -1,4 +1,7 @@
-const Order = require('../models/order.model');
+const { Sequelize } = require('sequelize');
+const {DataTypes} = require('sequelize');
+
+const Order = require('../models/order.model')(sequelize, DataTypes);
 
 const getOrders = async () => {
     return await Order.findAll();
