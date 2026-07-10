@@ -1,4 +1,4 @@
-const {ordersRepository} = require('../repositories/order.repository');
+const ordersRepository = require('../repositories/order.repository');
 const usersRepository = require('../repositories/users.repository')
 
 const calculateTotalPrice = (products) => {
@@ -14,13 +14,14 @@ const createOrder = async (orderData) => {
     if (!user) {
         throw new Error('Usuario no encontrado');
     }
-    const totalPrice = calculateTotalPrice(orderData.products);
     if(!orderData.products || orderData.products.length === 0) {
         throw new Error('La orden debe contener al menos un producto');
     }
+    const totalPrice = calculateTotalPrice(orderData.products);
     orderData.totalPrice = totalPrice;
     return await ordersRepository.createOrder(orderData);
 }
+
 
 const getOrderById = async (id) => {
     return await ordersRepository.getOrderById(id);
