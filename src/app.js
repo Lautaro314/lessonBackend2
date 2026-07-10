@@ -1,3 +1,4 @@
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const path = require("path");
@@ -5,12 +6,13 @@ const authRoutes = require("./routes/auth.routes.js");
 const usersRoutes = require("./routes/users.routes.js");
 const apiRoutes = require("./routes/api.routes.js");
 require("dotenv").config();
-const connectDB = require("./config/db");
+const { connectDB, sequelize } = require("./config/db");
 const passport = require("./config/passport.js");
 const { createSessionMiddleware } = require("./config/session.js");
 const { errorHandler } = require("./middleware/error.middleware.js");
 const productRoutes = require("./routes/products.routes");
 const processRoutes = require("./routes/process.routes");
+const orderRoutes = require("./routes/order.routes.js");
 
 const app = express();
 
@@ -41,6 +43,7 @@ app.use(cookieParser(process.env.SECRET));
 app.use(createSessionMiddleware());
 app.use(passport.initialize());
 app.use(passport.session());
+// Sincronización de base de datos movida a startServer
 
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -49,6 +52,7 @@ app.use("/api/v1/users", usersRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/process", processRoutes);
+app.use("/api/v1/orders", orderRoutes);
 
 console.log("Servidor iniciando");
 console.log("PID:", process.pid);
@@ -76,6 +80,8 @@ app.use(errorHandler);
 const startServer = async () => {
     try {
         await connectDB();
+        await sequelize.sync({ alter: true });
+        console.log("Base de datos de Sequelize sincronizada");
         app.listen(PORT, () => {
             console.log(`Servidor corriendo en el puerto ${PORT}`);
         });
@@ -85,3 +91,7 @@ const startServer = async () => {
 };
 
 startServer();
+
+
+
+

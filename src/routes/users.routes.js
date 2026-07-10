@@ -1,7 +1,6 @@
 const express = require("express");
-const router = express.Router()
-
-let users = [];
+const router = express.Router();
+const { getUsers, createUser } = require("../repositories/users.repository");
 
 // middleware local
 router.use((req, res, next) => {
@@ -10,23 +9,32 @@ router.use((req, res, next) => {
 });
 
 // GET /users
-router.get("/", (req, res) => {
-    res.json(users);
+router.get("/", async (req, res) => {
+    try {
+        const usersList = await getUsers();
+        res.json(usersList);
+    } catch (error) {
+        res.status(500).json({ error: "Error al obtener usuarios" });
+    }
 });
 
 // POST /users
-router.post("/", (req, res) => {
-    const { name } = req.body;
+router.post("/", async (req, res) => {
+    try {
+        const { name } = req.body;
 
-    if (!name) {
-        return res.status(400).json({
-            status: 400,
-            error: "Error"
-        });
+        if (!name) {
+            return res.status(400).json({
+                status: 400,
+                error: "El nombre es requerido"
+            });
+        }
+
+        const newUser = await createUser({ name });
+        res.status(201).json({ message: "Usuario creado", payload: newUser });
+    } catch (error) {
+        res.status(500).json({ error: "Error al crear usuario" });
     }
-
-    users.push({ name });
-    res.status(201).json({ message: "Usuario creado" });
 });
 
 module.exports = router;
