@@ -1,4 +1,4 @@
-const ordersRepository = require('../repositories/order.repository')
+const {ordersRepository} = require('../repositories/order.repository');
 const usersRepository = require('../repositories/users.repository')
 
 const calculateTotalPrice = (products) => {
