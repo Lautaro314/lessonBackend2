@@ -1,22 +1,23 @@
-const mongoose = require("mongoose");
+// src/models/user.model.js
+const { Schema, model } = require("mongoose");
+const { ROLES } = require("../constants/index.js");
 
-const userSchema = new mongoose.Schema({
-    email: {
-        type: String,
-        required: true,
-        unique: true,
-    },
-    password: {
-        type: String,
-    },
+const userSchema = new Schema(
+  {
+    first_name: { type: String, required: true },
+    last_name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
     role: {
-        type: String,
-        enum: ["user", "admin"],
-        default: "user",
+      type: String,
+      enum: Object.values(ROLES),
+      default: ROLES.USER,
     },
-    googleId: String,
-});
+    isDeleted: { type: Boolean, default: false },
+  },
+  { timestamps: true }
+);
 
-const UserModel = mongoose.model("User", userSchema);
+const UserModel = model("User", userSchema);
 
 module.exports = UserModel;
