@@ -1,11 +1,11 @@
-const {orderService} = require('../services/order.service')
+const orderService = require('../services/order.service')
 
 const getOrders = async (req , res) => {
     try {
         const orders = await orderService.getOrders();
         res.json({status:'success' , payload: orders})
     } catch (error) {
-        res.status(404).json({error:'Error al obtener las órdenes'})
+        res.status(500).json({error: error.message})
     }
 }
 
@@ -15,8 +15,9 @@ const createOrder = async (req, res) => {
         const newOrder = await orderService.createOrder(orderData);
         res.status(201).json({status:'success' , payload: newOrder})
     } catch(error) {
-        console.error('Error al crear la orden:', error);
-        res.status(400).json({error: error.message})
+        console.error(error);
+        console.error(error.stack);
+        res.status(500).json({error: error.message})
     }
 }
 
@@ -29,7 +30,7 @@ const getOrderById = async (req, res) => {
         }
         res.json({status:'success', payload: order})
     }catch(error) {
-        res.status(404).json({error:'Error al obtener la orden'})
+        res.status(500).json({error: error.message})
     }
 }
 
@@ -43,7 +44,7 @@ const updateOrder = async (req , res) => {
         }
         res.json({status:'success' , payload: updateOrder})
     }catch (error) {
-        res.status(400).json({error:'Error al actualizar la orden'})
+        res.status(500).json({error: error.message})
     }
 }
 
@@ -56,7 +57,7 @@ const deleteOrder = async (req , res) => {
         }
         res.json({status:'success' , payload: deleteOrder})
     }catch (error) {
-        res.status(400).json({error:'Error al eliminar la orden'})
+        res.status(500).json({error: error.message})
     }
 }
 

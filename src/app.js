@@ -1,59 +1,65 @@
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const path = require("path");
+const session = require("express-session");
 const authRoutes = require("./routes/auth.routes.js");
-const usersRoutes = require("./routes/users.routes.js");
-const apiRoutes = require("./routes/api.routes.js");
-require("dotenv").config();
-const { connectDB, sequelize } = require("./config/db");
-const passport = require("./config/passport.js");
-const { createSessionMiddleware } = require("./config/session.js");
+const usersRoutes = require("./routes/users.routes.js")
+const config = require("./config/env.config.js");
+const {connectDB} = require("./config/db");
+const passport = require("./config/passport.js")
+const { protectRoute, roleRestriction } = require("./middleware/auth.middleware.js");
 const { errorHandler } = require("./middleware/error.middleware.js");
 const productRoutes = require("./routes/products.routes");
 const processRoutes = require("./routes/process.routes");
-const orderRoutes = require("./routes/order.routes.js");
 
+// Inicialization
 const app = express();
-
-function getConfig() {
-    let mode = process.env.NODE_ENV || "development";
-    let port = process.env.PORT || 8080;
-
-    process.argv.slice(2).forEach((arg) => {
-        if (arg.startsWith("--port=")) {
-            port = Number(arg.split("=")[1]);
-        }
-        if (arg.startsWith("--mode=")) {
-            mode = arg.split("=")[1];
-        }
-    });
-
-    return { mode, port };
-}
-
-const config = getConfig();
 const PORT = config.port;
 const MODE = config.mode;
 process.env.NODE_ENV = MODE;
 
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(process.env.SECRET));
-app.use(createSessionMiddleware());
+app.use(session({
+
+    secret: process.env.SECRET,
+
+    resave: false,
+
+    saveUninitialized: false,
+
+    cookie: {
+
+        httpOnly: true,
+
+        secure: process.env.NODE_ENV === "production",
+
+        sameSite: "lax"
+
+    }
+
+}));
 app.use(passport.initialize());
 app.use(passport.session());
-// Sincronización de base de datos movida a startServer
 
+
+// Archivos estáticos
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/api/v1", apiRoutes);
-app.use("/api/v1/users", usersRoutes);
-app.use("/api/v1/auth", authRoutes);
-app.use("/api/v1/products", productRoutes);
-app.use("/api/v1/process", processRoutes);
-app.use("/api/v1/orders", orderRoutes);
 
+
+
+//endpoints disponibles para el manejo de la sesión 
+app.use("/api/v1/users", usersRoutes)
+app.use("/api/v1/auth", authRoutes);
+
+//endpoint para el uso del miniprograma fork
+app.use("/api/v1/products", productRoutes);
+
+//endpoint para el manejo del proceso
+app.use("/api/v1/process", processRoutes);
 console.log("Servidor iniciando");
 console.log("PID:", process.pid);
 console.log("ENV:", process.env.NODE_ENV);
@@ -64,34 +70,43 @@ process.on("SIGINT", () => {
 });
 
 app.get("/info", (req, res) => {
+
     res.json({
         pid: process.pid,
         env: process.env.NODE_ENV,
-        memory: process.memoryUsage(),
+        memory: process.memoryUsage()
     });
+
 });
 
+
+
+app.get("/admin", protectRoute, roleRestriction(["admin"]), (req, res) => {
+    res.send("Zona admin")
+})
+
 app.use((req, res) => {
-    res.status(404).json({ status: 404, message: "Ruta no encontrada" });
-});
+    res.status(404).send("404 not found")
+})
+
 
 app.use(errorHandler);
 
+
+// Sesión
 const startServer = async () => {
     try {
         await connectDB();
-        await sequelize.sync({ alter: true });
-        console.log("Base de datos de Sequelize sincronizada");
         app.listen(PORT, () => {
             console.log(`Servidor corriendo en el puerto ${PORT}`);
         });
     } catch (error) {
-        console.error("Error al iniciar el servidor", error);
+        console.error("Error al hacer la conexión", error)
     }
-};
+}
+
 
 startServer();
-
 
 
 

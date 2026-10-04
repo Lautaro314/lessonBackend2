@@ -1,15 +1,20 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db.js');
+const { DataTypes } = require("sequelize");
+const { sequelize } = require("../config/db");
 
-const Order = sequelize.define('order' , {
+const Order = sequelize.define("order", {
     userId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false,
-        references: {
-            model: 'users',
-            key: 'id'
-        }
-    }
+    },
+    products: {
+        type: DataTypes.JSON,
+        allowNull: false,
+    },
+    totalPrice: {
+        type: DataTypes.FLOAT,
+        allowNull: false,
+        defaultValue: 0,
+    },
 });
 
 module.exports = Order;

@@ -10,10 +10,6 @@ const getOrders = async () => {
 };
 
 const createOrder = async (orderData) => {
-    const user = await usersRepository.getUserById(orderData.userId);
-    if (!user) {
-        throw new Error('Usuario no encontrado');
-    }
     if(!orderData.products || orderData.products.length === 0) {
         throw new Error('La orden debe contener al menos un producto');
     }
@@ -21,7 +17,6 @@ const createOrder = async (orderData) => {
     orderData.totalPrice = totalPrice;
     return await ordersRepository.createOrder(orderData);
 }
-
 
 const getOrderById = async (id) => {
     return await ordersRepository.getOrderById(id);

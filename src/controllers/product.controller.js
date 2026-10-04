@@ -1,60 +1,54 @@
-const { fork } = require("child_process");
-const path = require("path");
+// src/controllers/product.controller.js
+const productService = require("../services/product.service.js");
 
-const processProducts = async (req, res) => {
-
+class ProductController {
+  getProducts = async (req, res, next) => {
     try {
-
-        const child = fork(
-            path.join(__dirname, "../workers/product.worker.js")
-        );
-
-        child.send({
-            products: [
-                {
-                    name: "Remera",
-                    price: 1000
-                },
-                {
-                    name: "Pantalón",
-                    price: 2000
-                }
-            ]
-        });
-
-        child.on("message", (response) => {
-
-            if (!response.success) {
-                return res.status(500).json({
-                    message: response.error
-                });
-            }
-
-            res.json({
-                message: "Productos procesados correctamente",
-                products: response.products
-            });
-        });
-
-        child.on("error", (error) => {
-
-            console.error(error);
-
-            res.status(500).json({
-                message: "Error en el worker"
-            });
-        });
-
-        child.on("exit", (code) => {
-            console.log(`Worker finalizado con código ${code}`);
-        });
-
+      const products = await productService.getAllProducts(req.query);
+      res.status(200).json({ status: "success", payload: products });
     } catch (error) {
-
-        res.status(500).json({
-            message: "Error del servidor"
-        });
+      next(error);
     }
-};
+  };
 
-module.exports = { processProducts };
+  getProductById = async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const product = await productService.getProductById(id);
+      res.status(200).json({ status: "success", payload: product });
+    } catch (error) {
+      res.status(404).json({ status: "error", message: error.message });
+    }
+  };
+
+  createProduct = async (req, res, next) => {
+    try {
+      const newProduct = await productService.createProduct(req.body);
+      res.status(201).json({ status: "success", payload: newProduct });
+    } catch (error) {
+      res.status(400).json({ status: "error", message: error.message });
+    }
+  };
+
+  updateProduct = async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const updatedProduct = await productService.updateProduct(id, req.body);
+      res.status(200).json({ status: "success", payload: updatedProduct });
+    } catch (error) {
+      res.status(400).json({ status: "error", message: error.message });
+    }
+  };
+
+  deleteProduct = async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      await productService.deleteProduct(id);
+      res.status(200).json({ status: "success", message: "Producto eliminado correctamente" });
+    } catch (error) {
+      res.status(404).json({ status: "error", message: error.message });
+    }
+  };
+}
+
+module.exports = new ProductController();
