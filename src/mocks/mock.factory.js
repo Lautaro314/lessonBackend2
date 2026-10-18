@@ -1,9 +1,9 @@
-// src/mocks/mock.factory.js
+
 const { faker } = require("@faker-js/faker");
 const { ROLES, ORDER_STATUS, ORDER_PRIORITY } = require("../constants/index.js");
 
 class MockFactory {
-  // Generar usuarios o repartidores simulados
+
   generateUser(customRole = null) {
     const rolesArray = [ROLES.USER, ROLES.ADMIN];
     const role = customRole || faker.helpers.arrayElement(rolesArray);
@@ -18,7 +18,7 @@ class MockFactory {
     };
   }
 
-  // Generar un pedido simulado (opcionalmente vinculado a un usuario)
+
   generateOrder(userId = null) {
     return {
       user: userId || faker.database.mongodbObjectId(),
@@ -36,7 +36,7 @@ class MockFactory {
     };
   }
 
-  // Generar una entrega vinculada a un pedido y repartidor
+
   generateDelivery(orderId = null, deliveryDriverId = null) {
     return {
       order: orderId || faker.database.mongodbObjectId(),

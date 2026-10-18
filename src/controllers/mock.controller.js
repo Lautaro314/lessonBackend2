@@ -1,4 +1,3 @@
-// src/controllers/mock.controller.js
 const mockService = require('../services/mock.service');
 
 class MockController {
@@ -33,5 +32,4 @@ class MockController {
   };
 }
 
-// ⚠️ IMPORTANTE: Exportar la INSTANCIA creada con 'new'
 module.exports = new MockController();
