@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const mocksController = require('../controllers/mocks.controller');
+const mocksController = require('../controllers/mock.controller');
 
 router.get('/mockingorders', mocksController.generateMockOrders);
 router.get('/mockingusers', mocksController.generateUsers)

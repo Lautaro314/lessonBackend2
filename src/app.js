@@ -11,6 +11,7 @@ const { protectRoute, roleRestriction } = require("./middleware/auth.middleware.
 const { errorHandler } = require("./middleware/error.middleware.js");
 const productRoutes = require("./routes/products.routes");
 const processRoutes = require("./routes/process.routes");
+const mockRoutes = require("./routes/mock.routes.js");
 
 // Inicialization
 const app = express();
@@ -54,6 +55,7 @@ app.use(express.static(path.join(__dirname, "public")));
 //endpoints disponibles para el manejo de la sesión 
 app.use("/api/v1/users", usersRoutes)
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/mocks", mockRoutes);
 
 //endpoint para el uso del miniprograma fork
 app.use("/api/v1/products", productRoutes);
