@@ -12,3 +12,13 @@ API REST refactorizada de una estructura monolítica a una arquitectura profesio
 
 ### Justificación de la Separación Service vs. Repository
 La separación entre la capa de **Servicio** y de **Repositorio** permite desacoplar la lógica de negocio de la tecnología de persistencia. El **Repository** se limita a buscar y guardar datos encapsulando detalles de Mongoose, mientras que el **Service** toma las decisiones del negocio sin importar el ORM/ODM utilizado.
+
+## 🧪 Módulo de Mocking y Carga de Datos (`/api/mocks`)
+
+Módulo desarrollado para la generación de datos simulados mediante `@faker-js/faker`, estructurado bajo la arquitectura por capas (**Controller-Service-Factory**).
+
+### Endpoints disponibles:
+
+- **`GET /api/mocks/mockingusers?qty=N`**: Devuelve `N` usuarios simulados sin persistir en la base de datos.
+- **`GET /api/mocks/mockingorders?qty=N`**: Devuelve `N` pedidos simulados con productos, totales, estados y prioridades tomados de las constantes.
+- **`POST /api/mocks/generateData?qty=N`**: Inserta masivamente en MongoDB `N` registros de prueba relacionando usuarios y repartidores.
