@@ -1,20 +1,34 @@
-const { DataTypes } = require("sequelize");
-const { sequelize } = require("../config/db");
+// src/models/order.model.js
+const { Schema, model } = require("mongoose");
+const { ORDER_STATUS, ORDER_PRIORITY } = require("../constants/index.js");
 
-const Order = sequelize.define("order", {
-    userId: {
-        type: DataTypes.STRING,
-        allowNull: false,
+const orderSchema = new Schema(
+  {
+    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    items: [
+      {
+        product_name: { type: String, required: true },
+        quantity: { type: Number, required: true },
+        price: { type: Number, required: true },
+      },
+    ],
+    total: { type: Number, required: true },
+    status: {
+      type: String,
+      enum: Object.values(ORDER_STATUS),
+      default: ORDER_STATUS.PENDING,
     },
-    products: {
-        type: DataTypes.JSON,
-        allowNull: false,
+    priority: {
+      type: String,
+      enum: Object.values(ORDER_PRIORITY),
+      default: ORDER_PRIORITY.MEDIUM,
     },
-    totalPrice: {
-        type: DataTypes.FLOAT,
-        allowNull: false,
-        defaultValue: 0,
-    },
-});
+    shipping_address: { type: String, required: true },
+    isDeleted: { type: Boolean, default: false },
+  },
+  { timestamps: true }
+);
 
-module.exports = Order;
+const OrderModel = model("Order", orderSchema);
+
+module.exports = OrderModel;

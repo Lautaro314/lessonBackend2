@@ -1,10 +1,9 @@
-// src/repositories/user.repository.js
 const UserModel = require("../models/user.model.js");
 
 class UserRepository {
   async findAll(filters = {}) {
     return await UserModel.find({ isDeleted: false, ...filters })
-      .select("-password") // Oculta la contraseña por seguridad
+      .select("-password")
       .lean();
   }
 
@@ -21,6 +20,12 @@ class UserRepository {
   async create(userData) {
     return await UserModel.create(userData);
   }
+
+  // 👇 MÉTODO NUEVO REQUERIDO PARA EL SEEDING
+  async createMany(usersData) {
+    return await UserModel.insertMany(usersData);
+  }
+  
 
   async update(id, updateData) {
     return await UserModel.findOneAndUpdate(

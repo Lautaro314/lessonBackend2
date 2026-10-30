@@ -1,39 +1,17 @@
-const Order = require("../models/order.model");
+const OrderModel = require("../models/order.model.js");
 
-const getOrders = async () => {
-    return await Order.findAll();
-};
+class OrderRepository {
+  async createMany(ordersData) {
+    return await OrderModel.insertMany(ordersData);
+  }
 
-const createOrder = async (orderData) => {
-    return await Order.create(orderData);
-};
+  async findAll(filters = {}) {
+    return await OrderModel.find({ isDeleted: false, ...filters }).lean();
+  }
 
-const getOrderById = async (id) => {
-    return await Order.findByPk(id);
-};
+  async findById(id) {
+    return await OrderModel.findOne({ _id: id, isDeleted: false }).lean();
+  }
+}
 
-const updateOrder = async (id, orderData) => {
-    const order = await Order.findByPk(id);
-
-    if (!order) return null;
-
-    return await order.update(orderData);
-};
-
-const deleteOrder = async (id) => {
-    const order = await Order.findByPk(id);
-
-    if (!order) return null;
-
-    await order.destroy();
-
-    return order;
-};
-
-module.exports = {
-    getOrders,
-    createOrder,
-    getOrderById,
-    updateOrder,
-    deleteOrder
-};
+module.exports = new OrderRepository();
