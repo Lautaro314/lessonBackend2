@@ -12,6 +12,7 @@ const { errorHandler } = require("./middleware/error.middleware.js");
 const productRoutes = require("./routes/products.routes");
 const processRoutes = require("./routes/process.routes");
 const mockRoutes = require("./routes/mock.routes.js");
+const errorMiddleware = require("./middleware/error.middleware.js");
 
 // Inicialization
 const app = express();
@@ -91,8 +92,7 @@ app.use((req, res) => {
     res.status(404).send("404 not found")
 })
 
-
-app.use(errorHandler);
+app.use(errorMiddleware);
 
 
 // Sesión

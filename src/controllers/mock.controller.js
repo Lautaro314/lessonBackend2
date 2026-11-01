@@ -4,7 +4,7 @@ const mockService = require("../services/mock.service.js");
 class MockController {
   getMockUsers = async (req, res, next) => {
     try {
-      const qty = parseInt(req.query.qty) || 10;
+      const qty = req.query.qty ?? 10;
       const users = mockService.getMockUsers(qty);
       res.status(200).json(users);
     } catch (error) {
@@ -14,7 +14,7 @@ class MockController {
 
   getMockOrders = async (req, res, next) => {
     try {
-      const qty = parseInt(req.query.qty) || 10;
+      const qty = req.query.qty ?? 10;
       const orders = mockService.getMockOrders(qty);
       res.status(200).json(orders);
     } catch (error) {
@@ -24,7 +24,7 @@ class MockController {
 
   seedDatabase = async (req, res, next) => {
     try {
-      const qty = parseInt(req.query.qty) || 10;
+      const qty = req.query.qty ?? 10;
       const result = await mockService.seedDatabase(qty);
       res.status(201).json(result);
     } catch (error) {
