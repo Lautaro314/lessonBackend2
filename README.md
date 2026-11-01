@@ -22,3 +22,17 @@ Módulo desarrollado para la generación de datos simulados mediante `@faker-js/
 - **`GET /api/mocks/mockingusers?qty=N`**: Devuelve `N` usuarios simulados sin persistir en la base de datos.
 - **`GET /api/mocks/mockingorders?qty=N`**: Devuelve `N` pedidos simulados con productos, totales, estados y prioridades tomados de las constantes.
 - **`POST /api/mocks/generateData?qty=N`**: Inserta masivamente en MongoDB `N` registros de prueba relacionando usuarios y repartidores.
+
+- ## ⚠️ Manejo Profesional de Errores (Módulo 3)
+
+La API cuenta con una capa centralizada de gestión de excepciones compuesta por:
+- **Diccionario de errores (`error.enums.js`)**: Define códigos HTTP y mensajes estandarizados.
+- **Clase de Error Personalizado (`CustomError`)**: Permite propagar errores controlados desde la capa de servicios.
+- **Middleware Global (`error.middleware.js`)**: Intercepta los errores y retorna una estructura JSON uniforme (`status` y `error`).
+
+### Estructura de Respuesta de Error:
+```json
+{
+  "status": "fail",
+  "error": "Mensaje descriptivo del error"
+}
