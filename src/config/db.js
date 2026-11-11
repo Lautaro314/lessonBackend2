@@ -1,5 +1,7 @@
+// src/config/db.js
 const mongoose = require("mongoose");
 const config = require("./env.config");
+const logger = require("./logger.config.js"); // 👈 Importamos el logger centralizado
 
 const connectDB = async () => {
     const uri = config.mongodbUri;
@@ -9,9 +11,9 @@ const connectDB = async () => {
             serverSelectionTimeoutMS: 15000,
             family: 4,
         });
-        console.log("Mongo DB conectado!!");
+        logger.info("Mongo DB conectado!!");
     } catch (error) {
-        console.error(error);
+        logger.fatal(`Error crítico al conectar con MongoDB: ${error.message}`);
         throw error;
     }
 };
@@ -19,16 +21,16 @@ const connectDB = async () => {
 const db = mongoose.connection;
 
 db.on("connected", () => {
-    console.log("Conexión exitosa!");
+    logger.info("Conexión exitosa a Mongoose!");
 });
 
 db.on("error", (err) => {
-    console.error("Error en mongo:", err.message);
+    logger.error(`Error en mongo: ${err.message}`);
 });
 
 db.on("disconnected", () => {
     if (mongoose.connection.readyState === 0) {
-        console.warn("Mongo desconectado.");
+        logger.warning("Mongo desconectado.");
     }
 });
 
@@ -38,12 +40,12 @@ db.on("disconnected", () => {
 
 const sequelize = {
     sync: async () => {
-        console.log("Base de datos (Sequelize Mock) sincronizada");
+        logger.info("Base de datos (Sequelize Mock) sincronizada");
         return { alter: true };
     },
 
     define: (modelName, attributes) => {
-        console.log(`Definiendo modelo mock para Sequelize: ${modelName}`);
+        logger.debug(`Definiendo modelo mock para Sequelize: ${modelName}`);
 
         const storage = [];
 

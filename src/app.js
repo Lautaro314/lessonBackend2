@@ -13,6 +13,8 @@ const productRoutes = require("./routes/products.routes");
 const processRoutes = require("./routes/process.routes");
 const mockRoutes = require("./routes/mock.routes.js");
 const errorMiddleware = require("./middleware/error.middleware.js");
+const logger = require("./config/logger.config.js");
+const loggerRoutes = require("./routes/logger.routes.js");
 
 // Inicialization
 const app = express();
@@ -63,6 +65,12 @@ app.use("/api/v1/products", productRoutes);
 
 //endpoint para el manejo del proceso
 app.use("/api/v1/process", processRoutes);
+app.use("/api/v1/luces", loggerRoutes);
+app.use("/api/v1/test", loggerRoutes);  
+
+
+
+
 console.log("Servidor iniciando");
 console.log("PID:", process.pid);
 console.log("ENV:", process.env.NODE_ENV);
@@ -100,10 +108,11 @@ const startServer = async () => {
     try {
         await connectDB();
         app.listen(PORT, () => {
-            console.log(`Servidor corriendo en el puerto ${PORT}`);
+            logger.info(`Servidor corriendo en el puerto ${PORT}`);
+            logger.info(`Modo: ${MODE}`);
         });
     } catch (error) {
-        console.error("Error al hacer la conexión", error)
+        logger.error("Error al hacer la conexión", error);
     }
 }
 
