@@ -37,23 +37,3 @@ La API cuenta con una capa centralizada de gestión de excepciones compuesta por
   "error": "Mensaje descriptivo del error"
 }
 
-## 📊 Sistema de Logging y Monitoreo (Módulo 4)
-
-El proyecto utiliza **Winston** para la gestión centralizada de registros y monitoreo, diferenciando comportamientos entre entornos de desarrollo y producción.
-
-### 📌 Niveles de Log Configurados (De mayor a menor severidad):
-1. **`fatal`**: Errores críticos del sistema (ej. fallo grave en la conexión a la base de datos).
-2. **`error`**: Excepciones de servidor y fallos inesperados.
-3. **`warning`**: Advertencias de negocio, rutas no encontradas o validaciones fallidas.
-4. **`info`**: Información general de eventos del sistema (ej. servidor iniciado, conexión exitosa).
-5. **`http`**: Peticiones HTTP entrantes.
-6. **`debug`**: Información detallada orientada al diagnóstico en desarrollo.
-
-### 🧪 Cómo probar el Endpoint del Logger:
-Se incorporó un endpoint de pruebas para disparar registros en todos los niveles de forma simultánea:
-- **`GET /api/test/loggerTest`**
-  - *Resultado*: Generará salidas en la consola del servidor y almacenará automáticamente los niveles `error` y `fatal` dentro de la carpeta `/logs` con rotación diaria.
-
-### 🗂️ Persistencia y GitIgnore:
-- Los registros de errores críticos se almacenan de forma local en la carpeta `/logs/` utilizando `winston-daily-rotate-file`.
-- La carpeta `/logs` se encuentra excluida en el archivo `.gitignore` para evitar la subida de archivos temporales de ejecución al repositorio de GitHub.
