@@ -15,6 +15,8 @@ const mockRoutes = require("./routes/mock.routes.js");
 const errorMiddleware = require("./middleware/error.middleware.js");
 const logger = require("./config/logger.config.js");
 const loggerRoutes = require("./routes/logger.routes.js");
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpecs = require("./config/swagger.config.js");
 
 // Inicialization
 const app = express();
@@ -59,6 +61,8 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/api/v1/users", usersRoutes)
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/mocks", mockRoutes);
+app.use("/api/v1/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+
 
 //endpoint para el uso del miniprograma fork
 app.use("/api/v1/products", productRoutes);
