@@ -74,7 +74,7 @@ const swaggerOptions = {
               items: { $ref: "#/components/schemas/OrderItem" },
             },
             total: { type: "number", example: 3001.00 },
-            status: { type: "string", enum: ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"], example: "PENDING" },
+            status: { type: "string", enum: ["PENDING", "IN_TRANSIT", "DELIVERED", "CANCELLED"], example: "PENDING" },
             priority: { type: "string", enum: ["LOW", "MEDIUM", "HIGH"], example: "MEDIUM" },
             shipping_address: { type: "string", example: "Av. Siempre Viva 742" },
             isDeleted: { type: "boolean", example: false },
@@ -94,8 +94,170 @@ const swaggerOptions = {
       },
     },
     paths: {
+      // --- ENDPOINTS DE USUARIOS ---
+      "/api/v1/users": {
+        get: {
+          summary: "Obtener usuarios",
+          tags: ["Users"],
+          responses: {
+            "200": {
+              description: "Listado de usuarios",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      status: { type: "string", example: "success" },
+                      payload: { type: "array", items: { $ref: "#/components/schemas/User" } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        post: {
+          summary: "Crear usuario",
+          tags: ["Users"],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["first_name", "last_name", "email", "password"],
+                  properties: {
+                    first_name: { type: "string", example: "Juan" },
+                    last_name: { type: "string", example: "Pérez" },
+                    email: { type: "string", example: "juan.perez@example.com" },
+                    password: { type: "string", example: "secret123" },
+                    role: { type: "string", enum: ["USER", "ADMIN", "DELIVERY"], example: "USER" },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "201": {
+              description: "Usuario creado",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/SuccessResponse" } } },
+            },
+            "400": {
+              description: "Datos inválidos o faltantes",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
+            },
+          },
+        },
+      },
+      "/api/v1/users/{id}": {
+        get: {
+          summary: "Obtener usuario por ID",
+          tags: ["Users"],
+          parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+          responses: {
+            "200": {
+              description: "Usuario encontrado",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/SuccessResponse" } } },
+            },
+            "404": {
+              description: "Usuario inexistente",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
+            },
+          },
+        },
+      },
+      // --- ENDPOINTS DE PEDIDOS ---
+      "/api/v1/orders": {
+        get: {
+          summary: "Obtener pedidos",
+          tags: ["Orders"],
+          responses: {
+            "200": {
+              description: "Listado de pedidos",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      status: { type: "string", example: "success" },
+                      payload: { type: "array", items: { $ref: "#/components/schemas/Order" } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        post: {
+          summary: "Crear pedido",
+          tags: ["Orders"],
+          requestBody: {
+            required: true,
+            content: { "application/json": { schema: { $ref: "#/components/schemas/Order" } } },
+          },
+          responses: {
+            "201": {
+              description: "Pedido creado",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/SuccessResponse" } } },
+            },
+            "400": {
+              description: "Datos incompletos (sin items)",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
+            },
+          },
+        },
+      },
+      "/api/v1/orders/{id}": {
+        get: {
+          summary: "Obtener pedido por ID",
+          tags: ["Orders"],
+          parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+          responses: {
+            "200": {
+              description: "Pedido encontrado",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/SuccessResponse" } } },
+            },
+            "404": {
+              description: "Pedido inexistente",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
+            },
+          },
+        },
+        put: {
+          summary: "Actualizar pedido / estado",
+          tags: ["Orders"],
+          parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    status: { type: "string", enum: ["PENDING", "IN_TRANSIT", "DELIVERED", "CANCELLED"] },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": {
+              description: "Pedido actualizado",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/SuccessResponse" } } },
+            },
+            "400": {
+              description: "Estado inválido",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
+            },
+            "404": {
+              description: "Pedido inexistente",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
+            },
+          },
+        },
+      },
       // --- ENDPOINTS DE MOCKS ---
-      "/api/mocks/users": {
+      "/api/v1/mocks/users": {
         get: {
           summary: "Obtener usuarios simulados",
           description: "Genera una cantidad específica de usuarios simulados usando Faker sin guardarlos en la base de datos.",
@@ -138,7 +300,7 @@ const swaggerOptions = {
           },
         },
       },
-      "/api/mocks/orders": {
+      "/api/v1/mocks/orders": {
         get: {
           summary: "Obtener pedidos simulados",
           description: "Genera una lista de pedidos falsos utilizando Faker sin persistencia en MongoDB.",
@@ -181,7 +343,7 @@ const swaggerOptions = {
           },
         },
       },
-      "/api/mocks/seed": {
+      "/api/v1/mocks/seed": {
         post: {
           summary: "Carga masiva / Seeding de datos dependientes",
           description: "Genera masivamente usuarios, pedidos y entregas en cadena, relacionándolos correctamente y guardándolos en MongoDB.",
@@ -237,7 +399,7 @@ const swaggerOptions = {
         },
       },
       // --- ENDPOINT DEL LOGGER ---
-      "/api/test/loggerTest": {
+      "/api/v1/test/loggerTest": {
         get: {
           summary: "Prueba de niveles de log (Winston)",
           description: "Herramienta interna de validación para disparar eventos en todos los niveles de severidad (debug, http, info, warning, error, fatal) y verificar la persistencia.",

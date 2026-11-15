@@ -12,6 +12,26 @@ class OrderRepository {
   async findById(id) {
     return await OrderModel.findOne({ _id: id, isDeleted: false }).lean();
   }
+
+  async create(orderData) {
+    return await OrderModel.create(orderData);
+  }
+
+  async update(id, updateData) {
+    return await OrderModel.findOneAndUpdate(
+      { _id: id, isDeleted: false },
+      updateData,
+      { new: true }
+    );
+  }
+
+  async softDelete(id) {
+    return await OrderModel.findOneAndUpdate(
+      { _id: id, isDeleted: false },
+      { isDeleted: true },
+      { new: true }
+    );
+  }
 }
 
 module.exports = new OrderRepository();

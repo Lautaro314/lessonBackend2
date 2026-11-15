@@ -16,7 +16,7 @@ class UserController {
       const user = await userService.getUserById(id);
       res.status(200).json({ status: "success", payload: user });
     } catch (error) {
-      res.status(404).json({ status: "error", message: error.message });
+      next(error);
     }
   };
 
@@ -25,7 +25,7 @@ class UserController {
       const newUser = await userService.createUser(req.body);
       res.status(201).json({ status: "success", payload: newUser });
     } catch (error) {
-      res.status(400).json({ status: "error", message: error.message });
+      next(error);
     }
   };
 
@@ -35,7 +35,7 @@ class UserController {
       const updatedUser = await userService.updateUser(id, req.body);
       res.status(200).json({ status: "success", payload: updatedUser });
     } catch (error) {
-      res.status(400).json({ status: "error", message: error.message });
+      next(error);
     }
   };
 
@@ -45,7 +45,7 @@ class UserController {
       await userService.deleteUser(id);
       res.status(200).json({ status: "success", message: "Usuario eliminado correctamente" });
     } catch (error) {
-      res.status(404).json({ status: "error", message: error.message });
+      next(error);
     }
   };
 }

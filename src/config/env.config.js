@@ -1,6 +1,9 @@
 const dotenv = require("dotenv");
+const path = require("path");
 
-dotenv.config();
+// Entorno de testing separado del de desarrollo
+const envFile = process.env.NODE_ENV === "test" ? ".env.test" : ".env";
+dotenv.config({ path: path.resolve(process.cwd(), envFile) });
 
 const requiredVariables = [
   "PORT",

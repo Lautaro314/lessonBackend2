@@ -2,7 +2,14 @@
 const winston = require("winston");
 require("winston-daily-rotate-file");
 const path = require("path");
+const fs = require("fs");
 const config = require("./env.config.js");
+
+// Asegura que exista el directorio de logs (ignorado por git)
+const logsDir = path.join(__dirname, "../../logs");
+if (!fs.existsSync(logsDir)) {
+  fs.mkdirSync(logsDir, { recursive: true });
+}
 
 
 const customLevelsOptions = {

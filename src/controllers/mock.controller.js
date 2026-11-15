@@ -6,7 +6,7 @@ class MockController {
     try {
       const qty = req.query.qty ?? 10;
       const users = mockService.getMockUsers(qty);
-      res.status(200).json(users);
+      res.status(200).json({ status: "success", payload: users });
     } catch (error) {
       next(error);
     }
@@ -16,7 +16,7 @@ class MockController {
     try {
       const qty = req.query.qty ?? 10;
       const orders = mockService.getMockOrders(qty);
-      res.status(200).json(orders);
+      res.status(200).json({ status: "success", payload: orders });
     } catch (error) {
       next(error);
     }
