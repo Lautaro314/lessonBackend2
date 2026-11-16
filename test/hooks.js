@@ -1,6 +1,10 @@
 // Root hooks de Mocha: se cargan ANTES que los archivos de test.
 // Seteamos las variables de entorno de testing a nivel superior para que
 // env.config.js cargue .env.test (y nunca el .env de desarrollo).
+const os = require("os");
+const path = require("path");
+const fs = require("fs");
+
 process.env.NODE_ENV = "test";
 process.env.PORT = process.env.PORT || "8080";
 process.env.MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/shipnow_test";
@@ -10,6 +14,10 @@ process.env.GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "test_google_clie
 process.env.GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "test_google_client_secret";
 process.env.GOOGLE_CALLBACK =
   process.env.GOOGLE_CALLBACK || "http://localhost:8080/api/v1/auth/google/callback";
+
+// Los archivos subidos en los tests van a una carpeta temporal descartable.
+const TEST_UPLOADS_DIR = path.join(os.tmpdir(), "shipnow-uploads-test");
+process.env.UPLOADS_DIR = TEST_UPLOADS_DIR;
 
 const mongoose = require("mongoose");
 const { MongoMemoryServer } = require("mongodb-memory-server");
@@ -34,5 +42,7 @@ exports.mochaHooks = {
     if (mongoServer) {
       await mongoServer.stop();
     }
+    // Limpieza de los archivos subidos durante los tests.
+    fs.rmSync(TEST_UPLOADS_DIR, { recursive: true, force: true });
   },
 };

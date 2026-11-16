@@ -1,6 +1,7 @@
 // src/models/user.model.js
 const { Schema, model } = require("mongoose");
 const { ROLES } = require("../constants/index.js");
+const fileMetadataSchema = require("./schemas/file-metadata.schema.js");
 
 const userSchema = new Schema(
   {
@@ -13,6 +14,7 @@ const userSchema = new Schema(
       enum: Object.values(ROLES),
       default: ROLES.USER,
     },
+    documents: { type: [fileMetadataSchema], default: [] },
     isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true }

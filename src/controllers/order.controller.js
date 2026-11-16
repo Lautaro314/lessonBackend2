@@ -50,4 +50,21 @@ const deleteOrder = async (req, res, next) => {
     }
 };
 
-module.exports = { getOrders, createOrder, getOrderById, updateOrder, deleteOrder };
+const uploadOrderReceipt = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const updatedOrder = await orderService.addOrderReceipt(id, req.file);
+        res.status(201).json({ status: "success", payload: updatedOrder });
+    } catch (error) {
+        next(error);
+    }
+};
+
+module.exports = {
+    getOrders,
+    createOrder,
+    getOrderById,
+    updateOrder,
+    deleteOrder,
+    uploadOrderReceipt,
+};

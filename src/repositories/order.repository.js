@@ -32,6 +32,15 @@ class OrderRepository {
       { new: true }
     );
   }
+
+  // Registra los metadatos de un comprobante en la entidad pedido
+  async addReceipt(id, receiptMetadata) {
+    return await OrderModel.findOneAndUpdate(
+      { _id: id, isDeleted: false },
+      { $push: { receipts: receiptMetadata } },
+      { new: true }
+    );
+  }
 }
 
 module.exports = new OrderRepository();

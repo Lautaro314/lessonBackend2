@@ -1,8 +1,10 @@
 // src/services/user.service.js
 const userRepository = require("../repositories/user.repository.js");
-const { ROLES } = require("../constants/index.js");
+const { ROLES, USER_DOCUMENT_TYPES } = require("../constants/index.js");
 const { ERROR_TYPES } = require("../constants/error.enums.js");
 const CustomError = require("../utils/errors/custom-error.js");
+const { buildFileMetadata, removeUploadedFile } = require("../utils/file.util.js");
+const logger = require("../config/logger.config.js");
 
 class UserService {
   async getAllUsers(filters) {
@@ -65,6 +67,47 @@ class UserService {
       throw new CustomError(ERROR_TYPES.USER_NOT_FOUND);
     }
     return deleted;
+  }
+
+  // Carga un documento del usuario y registra sus metadatos en la entidad
+  async addUserDocument(userId, file, documentType) {
+    try {
+      const user = await userRepository.findById(userId);
+      if (!user) {
+        throw new CustomError(ERROR_TYPES.USER_NOT_FOUND);
+      }
+
+      if (!file) {
+        throw new CustomError(ERROR_TYPES.FILE_REQUIRED);
+      }
+
+      const normalizedType = documentType ? String(documentType).toUpperCase() : null;
+      if (!normalizedType || !Object.values(USER_DOCUMENT_TYPES).includes(normalizedType)) {
+        throw new CustomError(ERROR_TYPES.INVALID_DOCUMENT_TYPE);
+      }
+
+      const metadata = buildFileMetadata(file, normalizedType);
+
+      const updated = await userRepository.addDocument(userId, metadata);
+      if (!updated) {
+        throw new CustomError(ERROR_TYPES.FILE_SAVE_ERROR);
+      }
+
+      logger.info(
+        `Documento de usuario cargado: ${metadata.filename} (tipo ${normalizedType}) para el usuario ${userId}`
+      );
+
+      return updated;
+    } catch (error) {
+      // Si el archivo ya fue guardado en disco pero falló la asociación, lo eliminamos.
+      if (file) {
+        removeUploadedFile(file);
+      }
+      if (error instanceof CustomError) {
+        throw error;
+      }
+      throw new CustomError(ERROR_TYPES.FILE_SAVE_ERROR);
+    }
   }
 }
 

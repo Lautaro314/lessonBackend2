@@ -25,9 +25,31 @@ const ORDER_PRIORITY = Object.freeze({
   HIGH: "HIGH",
 });
 
+// Tipos de documento aceptados para los archivos de usuario
+const USER_DOCUMENT_TYPES = Object.freeze({
+  DNI: "DNI",
+  LICENSE: "LICENSE",
+  PASSPORT: "PASSPORT",
+  PROOF_OF_ADDRESS: "PROOF_OF_ADDRESS",
+});
+
+// MIME types permitidos para la carga de archivos
+const ALLOWED_FILE_MIME_TYPES = Object.freeze([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "application/pdf",
+]);
+
+// Tamaño máximo permitido por archivo (5 MB)
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
+
 module.exports = {
   ROLES,
   PRODUCT_STATUS,
   ORDER_STATUS,
   ORDER_PRIORITY,
+  USER_DOCUMENT_TYPES,
+  ALLOWED_FILE_MIME_TYPES,
+  MAX_FILE_SIZE_BYTES,
 };

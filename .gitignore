@@ -4,3 +4,7 @@ node_modules/
 # Logs
 logs/
 *.log
+
+# Archivos subidos (no van al repositorio)
+uploads/
+uploads-test/

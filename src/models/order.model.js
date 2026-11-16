@@ -1,6 +1,7 @@
 // src/models/order.model.js
 const { Schema, model } = require("mongoose");
 const { ORDER_STATUS, ORDER_PRIORITY } = require("../constants/index.js");
+const fileMetadataSchema = require("./schemas/file-metadata.schema.js");
 
 const orderSchema = new Schema(
   {
@@ -24,6 +25,7 @@ const orderSchema = new Schema(
       default: ORDER_PRIORITY.MEDIUM,
     },
     shipping_address: { type: String, required: true },
+    receipts: { type: [fileMetadataSchema], default: [] },
     isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true }

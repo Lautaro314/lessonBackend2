@@ -42,6 +42,15 @@ class UserRepository {
       { new: true }
     );
   }
+
+  // Registra los metadatos de un documento en la entidad usuario
+  async addDocument(id, documentMetadata) {
+    return await UserModel.findOneAndUpdate(
+      { _id: id, isDeleted: false },
+      { $push: { documents: documentMetadata } },
+      { new: true }
+    ).select("-password");
+  }
 }
 
 module.exports = new UserRepository();

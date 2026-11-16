@@ -25,6 +25,7 @@ const swaggerOptions = {
       { name: "Deliveries", description: "Control y seguimiento de entregas logísticas" },
       { name: "Mocks", description: "Generación de datos de prueba y seeding de MongoDB" },
       { name: "Logger", description: "Herramienta interna de validación de niveles de log" },
+      { name: "Uploads", description: "Carga de archivos, documentos y comprobantes" },
     ],
     components: {
       schemas: {
@@ -89,6 +90,19 @@ const swaggerOptions = {
             tracking_code: { type: "string", example: "TRK-987654321" },
             status: { type: "string", example: "PENDING" },
             isDeleted: { type: "boolean", example: false },
+          },
+        },
+        FileMetadata: {
+          type: "object",
+          description: "Metadatos del archivo persistidos en la base (no el archivo en sí).",
+          properties: {
+            original_name: { type: "string", example: "dni-frente.jpg" },
+            filename: { type: "string", example: "1719000000000-a1b2c3d4e5f6a7b8.jpg" },
+            path: { type: "string", example: "users/1719000000000-a1b2c3d4e5f6a7b8.jpg" },
+            mimetype: { type: "string", example: "image/jpeg" },
+            size: { type: "number", example: 204800 },
+            document_type: { type: "string", example: "DNI" },
+            uploaded_at: { type: "string", format: "date-time", example: "2026-06-01T12:00:00.000Z" },
           },
         },
       },
@@ -158,6 +172,55 @@ const swaggerOptions = {
             "200": {
               description: "Usuario encontrado",
               content: { "application/json": { schema: { $ref: "#/components/schemas/SuccessResponse" } } },
+            },
+            "404": {
+              description: "Usuario inexistente",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
+            },
+          },
+        },
+      },
+      // --- CARGA DE DOCUMENTOS DE USUARIO ---
+      "/api/v1/users/{id}/documents": {
+        post: {
+          summary: "Subir documento de usuario",
+          description:
+            "Recibe un archivo (multipart/form-data), lo valida, lo guarda en la carpeta correspondiente y registra sus metadatos en la entidad usuario. Si el tipo de documento es LICENSE se guarda en uploads/licenses; el resto en uploads/users.",
+          tags: ["Uploads"],
+          parameters: [
+            { name: "id", in: "path", required: true, description: "ID del usuario", schema: { type: "string" } },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              "multipart/form-data": {
+                schema: {
+                  type: "object",
+                  required: ["document", "document_type"],
+                  properties: {
+                    document: {
+                      type: "string",
+                      format: "binary",
+                      description: "Archivo a subir (JPEG, PNG, WEBP o PDF, máx. 5MB)",
+                    },
+                    document_type: {
+                      type: "string",
+                      enum: ["DNI", "LICENSE", "PASSPORT", "PROOF_OF_ADDRESS"],
+                      description: "Tipo de documento",
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "201": {
+              description: "Documento cargado y metadatos registrados",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/SuccessResponse" } } },
+            },
+            "400": {
+              description: "Archivo faltante, tipo inválido, tamaño superado o tipo de documento inválido",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
             },
             "404": {
               description: "Usuario inexistente",
@@ -247,6 +310,50 @@ const swaggerOptions = {
             },
             "400": {
               description: "Estado inválido",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
+            },
+            "404": {
+              description: "Pedido inexistente",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
+            },
+          },
+        },
+      },
+      // --- CARGA DE COMPROBANTES DE PEDIDO ---
+      "/api/v1/orders/{id}/receipts": {
+        post: {
+          summary: "Subir comprobante de pedido",
+          description:
+            "Recibe un archivo (multipart/form-data), valida que el pedido exista, lo guarda en uploads/receipts y registra sus metadatos en la entidad pedido.",
+          tags: ["Uploads"],
+          parameters: [
+            { name: "id", in: "path", required: true, description: "ID del pedido", schema: { type: "string" } },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              "multipart/form-data": {
+                schema: {
+                  type: "object",
+                  required: ["receipt"],
+                  properties: {
+                    receipt: {
+                      type: "string",
+                      format: "binary",
+                      description: "Comprobante a subir (JPEG, PNG, WEBP o PDF, máx. 5MB)",
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "201": {
+              description: "Comprobante cargado y asociado al pedido",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/SuccessResponse" } } },
+            },
+            "400": {
+              description: "Archivo faltante, tipo inválido, tamaño superado o campo inesperado",
               content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
             },
             "404": {

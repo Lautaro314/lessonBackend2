@@ -38,6 +38,45 @@ La API cuenta con una capa centralizada de gestión de excepciones compuesta por
 }
 ```
 
+## 📎 Carga de Archivos, Documentos y Comprobantes (Pre-entrega Módulo 7)
+
+Carga de archivos con **Multer** integrada a la arquitectura por capas, el sistema de errores, el logger, Swagger y los tests funcionales.
+
+### Configuración centralizada de Multer (`src/config/multer.config.js`)
+
+- **Almacenamiento**: `diskStorage` en la carpeta raíz `uploads/` (configurable con `UPLOADS_DIR`).
+- **Subcarpetas por tipo**: `uploads/users` (documentos de usuario), `uploads/licenses` (licencias) y `uploads/receipts` (comprobantes de pedidos).
+- **Nombrado**: nombre único generado (`timestamp + random`) preservando la extensión original; el nombre original se guarda solo como metadato.
+- **Tipos permitidos**: `image/jpeg`, `image/png`, `image/webp`, `application/pdf`.
+- **Tamaño máximo**: 5 MB por archivo.
+- **Errores de Multer normalizados** al formato del proyecto (`LIMIT_FILE_SIZE` → tamaño máximo, `LIMIT_UNEXPECTED_FILE` → campo inesperado, tipo inválido → error propio).
+- **Limpieza**: si la asociación con la entidad falla luego de guardar el archivo, el archivo se elimina del disco para no dejar huérfanos.
+
+La carpeta `uploads/` está en `.gitignore`: al repositorio **nunca** se suben los archivos cargados.
+
+### Endpoints
+
+| Método | Endpoint | Campo multipart | Descripción |
+| --- | --- | --- | --- |
+| `POST` | `/api/v1/users/:id/documents` | `document` + `document_type` | Sube un documento de usuario, valida que el usuario y el tipo existan, lo guarda en `users/` o `licenses/` y registra los metadatos en el usuario. |
+| `POST` | `/api/v1/orders/:id/receipts` | `receipt` | Sube un comprobante, valida que el pedido exista, lo guarda en `receipts/` y registra los metadatos en el pedido. |
+
+Tipos de documento válidos para usuarios: `DNI`, `LICENSE`, `PASSPORT`, `PROOF_OF_ADDRESS`.
+
+### Metadatos persistidos (no el archivo)
+
+En la base se guardan únicamente: `original_name`, `filename` (generado), `path`, `mimetype`, `size`, `document_type` y `uploaded_at`. El esquema reutilizable vive en `src/models/schemas/file-metadata.schema.js` y se embebe como subdocumentos en `User.documents` y `Order.receipts`.
+
+### Errores específicos y logging
+
+Se agregaron errores centralizados en `error.enums.js`: archivo requerido, tipo de archivo inválido, tamaño superado, tipo de documento inválido, campo inesperado, entidad no encontrada y error al guardar. Todos responden con el formato general `{ status, error }`.
+
+El logger registra la carga exitosa, los intentos de tipo no permitido, los comprobantes asociados y los errores (a través del middleware global).
+
+### Swagger
+
+Ambos endpoints están documentados como `multipart/form-data`, indicando el nombre del campo de archivo, los campos adicionales requeridos, los tipos de documento permitidos, la respuesta `201` y los errores `400`/`404`.
+
 ## 🧪 Testing (Pre-entrega Módulo 6)
 
 Suite de **tests funcionales** que validan los endpoints principales de ShipNow, cubriendo casos exitosos y errores esperados (status HTTP + estructura del body + formato de error del módulo de errores).
@@ -96,7 +135,8 @@ Los tests viven en la carpeta `test/`, agrupados por recurso:
 | `test/orders.test.js` | `GET /api/v1/orders`, `POST /api/v1/orders`, `GET /api/v1/orders/:id`, `PUT /api/v1/orders/:id` | listado, creación con total calculado, consulta por ID, actualización de estado | 404 pedido inexistente, 400 sin items, 400 estado inválido |
 | `test/mocks.test.js` | `GET /api/v1/mocks/users`, `GET /api/v1/mocks/orders`, `POST /api/v1/mocks/seed` | generación de usuarios/pedidos, seeding relacionado | 400 cantidades inválidas |
 | `test/logger.test.js` | `GET /api/v1/test/loggerTest` | genera logs en todos los niveles | — |
-| `test/swagger.test.js` | `GET /api/v1/docs` | sirve la documentación + valida la spec OpenAPI | — |
+| `test/swagger.test.js` | `GET /api/v1/docs` | sirve la documentación + valida la spec OpenAPI y los endpoints multipart | — |
+| `test/uploads.test.js` | `POST /api/v1/users/:id/documents`, `POST /api/v1/orders/:id/receipts` | carga de documento/comprobante, guardado en disco y metadatos en la base, carpeta `licenses` | 400 archivo faltante, 400 tipo de archivo inválido, 400 tamaño superado, 400 tipo de documento inválido, 400 campo inesperado, 404 usuario/pedido inexistente |
 | `test/notfound.test.js` | cualquier ruta inexistente | — | 404 con formato de error |
 
 Cada test valida status HTTP **y** la estructura del body (por ejemplo `{ status: "success", payload: [...] }` o `{ status: "fail", error: "..." }`). Los comportamientos documentados en Swagger (p. ej. el `404` ante un recurso inexistente o el `400` ante `qty` inválido) tienen su test correspondiente.

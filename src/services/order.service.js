@@ -2,6 +2,8 @@ const orderRepository = require("../repositories/order.repository.js");
 const { ORDER_STATUS } = require("../constants/index.js");
 const { ERROR_TYPES } = require("../constants/error.enums.js");
 const CustomError = require("../utils/errors/custom-error.js");
+const { buildFileMetadata, removeUploadedFile } = require("../utils/file.util.js");
+const logger = require("../config/logger.config.js");
 
 const calculateTotalPrice = (items = []) => {
   return items.reduce((total, item) => total + item.price * item.quantity, 0);
@@ -59,4 +61,46 @@ const deleteOrder = async (id) => {
   return await orderRepository.softDelete(id);
 };
 
-module.exports = { getOrders, createOrder, getOrderById, updateOrder, deleteOrder };
+// Asocia un comprobante a un pedido y registra sus metadatos
+const addOrderReceipt = async (orderId, file) => {
+  try {
+    const order = await orderRepository.findById(orderId);
+    if (!order) {
+      throw new CustomError(ERROR_TYPES.ORDER_NOT_FOUND);
+    }
+
+    if (!file) {
+      throw new CustomError(ERROR_TYPES.FILE_REQUIRED);
+    }
+
+    const metadata = buildFileMetadata(file, "RECEIPT");
+
+    const updated = await orderRepository.addReceipt(orderId, metadata);
+    if (!updated) {
+      throw new CustomError(ERROR_TYPES.FILE_SAVE_ERROR);
+    }
+
+    logger.info(
+      `Comprobante asociado al pedido ${orderId}: ${metadata.filename}`
+    );
+
+    return updated;
+  } catch (error) {
+    if (file) {
+      removeUploadedFile(file);
+    }
+    if (error instanceof CustomError) {
+      throw error;
+    }
+    throw new CustomError(ERROR_TYPES.FILE_SAVE_ERROR);
+  }
+};
+
+module.exports = {
+  getOrders,
+  createOrder,
+  getOrderById,
+  updateOrder,
+  deleteOrder,
+  addOrderReceipt,
+};

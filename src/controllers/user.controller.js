@@ -48,6 +48,20 @@ class UserController {
       next(error);
     }
   };
+
+  uploadUserDocument = async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const updatedUser = await userService.addUserDocument(
+        id,
+        req.file,
+        req.body.document_type
+      );
+      res.status(201).json({ status: "success", payload: updatedUser });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 module.exports = new UserController();
