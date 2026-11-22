@@ -1,7 +1,7 @@
 {
   "name": "lesson-backend2",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
     "dev": "node src/server.js",
@@ -11,7 +11,10 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "API REST ShipNow con paginación, health check y despliegue con Docker",
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "@faker-js/faker": "^10.6.0",
     "bcrypt": "^6.0.0",

@@ -8,3 +8,9 @@ logs/
 # Archivos subidos (no van al repositorio)
 uploads/
 uploads-test/
+
+# Cobertura y temporales
+coverage/
+.nyc_output/
+*.tmp
+.DS_Store

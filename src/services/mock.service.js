@@ -1,6 +1,6 @@
 const { faker } = require("@faker-js/faker");
 const mockFactory = require("../mocks/mock.factory.js");
-const { ROLES } = require("../constants/index.js");
+const { ROLES, MAX_MOCK_ITEMS } = require("../constants/index.js");
 const { ERROR_TYPES } = require("../constants/error.enums.js");
 const CustomError = require("../utils/errors/custom-error.js");
 const userRepository = require("../repositories/user.repository.js");
@@ -10,7 +10,7 @@ const deliveryRepository = require("../repositories/delivery.repository.js");
 class MockService {
   validateQty(qty) {
     const parsedQty = Number(qty);
-    if (!Number.isInteger(parsedQty) || parsedQty <= 0) {
+    if (!Number.isInteger(parsedQty) || parsedQty <= 0 || parsedQty > MAX_MOCK_ITEMS) {
       throw new CustomError(ERROR_TYPES.INVALID_ARGUMENT);
     }
     return parsedQty;

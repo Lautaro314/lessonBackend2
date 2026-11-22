@@ -5,6 +5,7 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
+const os = require("os");
 const logger = require("./logger.config.js");
 const CustomError = require("../utils/errors/custom-error.js");
 const { ERROR_TYPES } = require("../constants/error.enums.js");
@@ -14,9 +15,10 @@ const {
   USER_DOCUMENT_TYPES,
 } = require("../constants/index.js");
 
-// Raíz de uploads configurable (en testing se apunta a una carpeta temporal).
+// Raíz de uploads configurable. Por defecto se usa una carpeta temporal del
+// sistema (nunca dentro del repo); en producción conviene un volumen externo.
 const UPLOADS_ROOT =
-  process.env.UPLOADS_DIR || path.join(__dirname, "../../uploads");
+  process.env.UPLOADS_DIR || path.join(os.tmpdir(), "shipnow-uploads");
 
 // Subcarpetas por tipo de archivo
 const UPLOAD_FOLDERS = Object.freeze({
@@ -49,8 +51,7 @@ const buildStorage = (folder) =>
       const target =
         typeof folder === "function" ? folder(req) : folder;
       const dest = path.join(UPLOADS_ROOT, target);
-      ensureDir(dest);
-      cb(null, dest);
+      fs.mkdir(dest, { recursive: true }, (error) => cb(error, dest));
     },
     filename: (req, file, cb) => cb(null, buildFilename(file.originalname)),
   });
@@ -83,7 +84,7 @@ const normalizeMulterError = (err) => {
 const createUploader = (fieldName, folder) => {
   const upload = multer({
     storage: buildStorage(folder),
-    limits: { fileSize: MAX_FILE_SIZE_BYTES },
+    limits: { fileSize: MAX_FILE_SIZE_BYTES, files: 1, fields: 10, parts: 12 },
     fileFilter,
   });
 

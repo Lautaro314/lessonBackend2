@@ -44,6 +44,9 @@ const ALLOWED_FILE_MIME_TYPES = Object.freeze([
 // Tamaño máximo permitido por archivo (5 MB)
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 
+// Tope de generación/seed de datos simulados por request
+const MAX_MOCK_ITEMS = 100;
+
 module.exports = {
   ROLES,
   PRODUCT_STATUS,
@@ -52,4 +55,5 @@ module.exports = {
   USER_DOCUMENT_TYPES,
   ALLOWED_FILE_MIME_TYPES,
   MAX_FILE_SIZE_BYTES,
+  MAX_MOCK_ITEMS,
 };

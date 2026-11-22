@@ -4,11 +4,18 @@ const { ROLES, USER_DOCUMENT_TYPES } = require("../constants/index.js");
 const { ERROR_TYPES } = require("../constants/error.enums.js");
 const CustomError = require("../utils/errors/custom-error.js");
 const { buildFileMetadata, removeUploadedFile } = require("../utils/file.util.js");
+const { buildSafeFilters } = require("../utils/query-filters.util.js");
 const logger = require("../config/logger.config.js");
 
+const USER_FILTERS = Object.freeze({
+  email: null,
+  role: Object.values(ROLES),
+});
+
 class UserService {
-  async getAllUsers(filters) {
-    return await userRepository.findAll(filters);
+  async getAllUsers(query, pagination) {
+    const filters = buildSafeFilters(query, USER_FILTERS);
+    return await userRepository.findPaginated(filters, pagination);
   }
 
   async getUserById(id) {

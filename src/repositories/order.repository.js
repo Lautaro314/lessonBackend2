@@ -5,8 +5,13 @@ class OrderRepository {
     return await OrderModel.insertMany(ordersData);
   }
 
-  async findAll(filters = {}) {
-    return await OrderModel.find({ isDeleted: false, ...filters }).lean();
+  async findPaginated(filters = {}, { skip, limit }) {
+    const query = { isDeleted: false, ...filters };
+    const [items, total] = await Promise.all([
+      OrderModel.find(query).sort({ _id: -1 }).skip(skip).limit(limit).lean(),
+      OrderModel.countDocuments(query),
+    ]);
+    return { items, total };
   }
 
   async findById(id) {

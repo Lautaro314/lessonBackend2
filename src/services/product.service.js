@@ -1,9 +1,16 @@
 const productRepository = require("../repositories/product.repository.js");
 const { PRODUCT_STATUS } = require("../constants/index.js");
+const { buildSafeFilters } = require("../utils/query-filters.util.js");
+
+const PRODUCT_FILTERS = Object.freeze({
+  name: null,
+  status: Object.values(PRODUCT_STATUS),
+});
 
 class ProductService {
-  async getAllProducts(filters) {
-    return await productRepository.findAll(filters);
+  async getAllProducts(query, pagination) {
+    const filters = buildSafeFilters(query, PRODUCT_FILTERS);
+    return await productRepository.findPaginated(filters, pagination);
   }
 
   async getProductById(id) {

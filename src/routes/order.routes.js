@@ -9,8 +9,9 @@ const {
     uploadOrderReceipt,
 } = require('../controllers/order.controller');
 const { uploadOrderReceipt: uploadReceiptMiddleware } = require('../config/multer.config.js');
+const paginate = require('../middleware/pagination.middleware.js');
 
-router.get('/' , getOrders)
+router.get('/' , paginate, getOrders)
 router.post('/' , createOrder)
 router.get('/:id' , getOrderById)
 router.put('/:id' , updateOrder)

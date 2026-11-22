@@ -1,6 +1,6 @@
 // src/config/swagger.config.js
 const swaggerJSDoc = require("swagger-jsdoc");
-const path = require("path");
+const config = require("./env.config.js");
 
 const swaggerOptions = {
   definition: {
@@ -15,8 +15,8 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: "http://localhost:8080",
-        description: "Servidor Local de Desarrollo",
+        url: config.publicUrl,
+        description: `API ShipNow (${config.mode})`,
       },
     ],
     tags: [
@@ -26,6 +26,7 @@ const swaggerOptions = {
       { name: "Mocks", description: "Generación de datos de prueba y seeding de MongoDB" },
       { name: "Logger", description: "Herramienta interna de validación de niveles de log" },
       { name: "Uploads", description: "Carga de archivos, documentos y comprobantes" },
+      { name: "Health", description: "Health check simple de la API" },
     ],
     components: {
       schemas: {
@@ -42,6 +43,17 @@ const swaggerOptions = {
           properties: {
             status: { type: "string", example: "success" },
             payload: { type: "object" },
+          },
+        },
+        Pagination: {
+          type: "object",
+          properties: {
+            total: { type: "integer", example: 42 },
+            page: { type: "integer", example: 1 },
+            limit: { type: "integer", example: 20 },
+            totalPages: { type: "integer", example: 3 },
+            hasNext: { type: "boolean", example: true },
+            hasPrev: { type: "boolean", example: false },
           },
         },
 
@@ -106,16 +118,37 @@ const swaggerOptions = {
           },
         },
       },
+      parameters: {
+        Page: {
+          name: "page",
+          in: "query",
+          description: "Número de página (desde 1)",
+          schema: { type: "integer", minimum: 1, default: 1 },
+        },
+        Limit: {
+          name: "limit",
+          in: "query",
+          description: "Cantidad de resultados por página (máximo 100)",
+          schema: { type: "integer", minimum: 1, maximum: 100, default: 20 },
+        },
+      },
     },
     paths: {
       // --- ENDPOINTS DE USUARIOS ---
       "/api/v1/users": {
         get: {
-          summary: "Obtener usuarios",
+          summary: "Obtener usuarios (paginado)",
+          description: "Devuelve como máximo 20 usuarios por página (limit máximo 100). Filtros permitidos: email y role.",
           tags: ["Users"],
+          parameters: [
+            { $ref: "#/components/parameters/Page" },
+            { $ref: "#/components/parameters/Limit" },
+            { name: "email", in: "query", schema: { type: "string" } },
+            { name: "role", in: "query", schema: { type: "string", enum: ["USER", "ADMIN", "DELIVERY"] } },
+          ],
           responses: {
             "200": {
-              description: "Listado de usuarios",
+              description: "Listado paginado de usuarios",
               content: {
                 "application/json": {
                   schema: {
@@ -123,10 +156,15 @@ const swaggerOptions = {
                     properties: {
                       status: { type: "string", example: "success" },
                       payload: { type: "array", items: { $ref: "#/components/schemas/User" } },
+                      pagination: { $ref: "#/components/schemas/Pagination" },
                     },
                   },
                 },
               },
+            },
+            "400": {
+              description: "Paginación o filtro inválido",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
             },
           },
         },
@@ -232,11 +270,19 @@ const swaggerOptions = {
       // --- ENDPOINTS DE PEDIDOS ---
       "/api/v1/orders": {
         get: {
-          summary: "Obtener pedidos",
+          summary: "Obtener pedidos (paginado)",
+          description: "Devuelve como máximo 20 pedidos por página (limit máximo 100). Filtros permitidos: user, status y priority.",
           tags: ["Orders"],
+          parameters: [
+            { $ref: "#/components/parameters/Page" },
+            { $ref: "#/components/parameters/Limit" },
+            { name: "user", in: "query", schema: { type: "string" } },
+            { name: "status", in: "query", schema: { type: "string", enum: ["PENDING", "IN_TRANSIT", "DELIVERED", "CANCELLED"] } },
+            { name: "priority", in: "query", schema: { type: "string", enum: ["LOW", "MEDIUM", "HIGH"] } },
+          ],
           responses: {
             "200": {
-              description: "Listado de pedidos",
+              description: "Listado paginado de pedidos",
               content: {
                 "application/json": {
                   schema: {
@@ -244,10 +290,15 @@ const swaggerOptions = {
                     properties: {
                       status: { type: "string", example: "success" },
                       payload: { type: "array", items: { $ref: "#/components/schemas/Order" } },
+                      pagination: { $ref: "#/components/schemas/Pagination" },
                     },
                   },
                 },
               },
+            },
+            "400": {
+              description: "Paginación o filtro inválido",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
             },
           },
         },
@@ -363,6 +414,68 @@ const swaggerOptions = {
           },
         },
       },
+      // --- ENDPOINTS DE ENTREGAS ---
+      "/api/v1/deliveries": {
+        get: {
+          summary: "Obtener entregas (paginado)",
+          description: "Devuelve como máximo 20 entregas por página (limit máximo 100). Filtros permitidos: order, delivery_driver y status.",
+          tags: ["Deliveries"],
+          parameters: [
+            { $ref: "#/components/parameters/Page" },
+            { $ref: "#/components/parameters/Limit" },
+            { name: "order", in: "query", schema: { type: "string" } },
+            { name: "delivery_driver", in: "query", schema: { type: "string" } },
+            { name: "status", in: "query", schema: { type: "string", enum: ["PENDING", "IN_TRANSIT", "DELIVERED", "CANCELLED"] } },
+          ],
+          responses: {
+            "200": {
+              description: "Listado paginado de entregas",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      status: { type: "string", example: "success" },
+                      payload: { type: "array", items: { $ref: "#/components/schemas/Delivery" } },
+                      pagination: { $ref: "#/components/schemas/Pagination" },
+                    },
+                  },
+                },
+              },
+            },
+            "400": {
+              description: "Paginación o filtro inválido",
+              content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } },
+            },
+          },
+        },
+      },
+      // --- HEALTH CHECK ---
+      "/health": {
+        get: {
+          summary: "Health check de la API",
+          description: "Estado mínimo del proceso: sin secretos, pid, memoria ni datos de base.",
+          tags: ["Health"],
+          responses: {
+            "200": {
+              description: "API activa",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      status: { type: "string", example: "ok" },
+                      environment: { type: "string", example: "production" },
+                      uptime: { type: "number", example: 12.345 },
+                      timestamp: { type: "string", format: "date-time" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
       // --- ENDPOINTS DE MOCKS ---
       "/api/v1/mocks/users": {
         get: {
@@ -373,8 +486,8 @@ const swaggerOptions = {
             {
               name: "qty",
               in: "query",
-              description: "Cantidad de usuarios a simular (debe ser mayor a 0)",
-              required: true,
+              description: "Cantidad de usuarios a simular (1 a 100, por defecto 10)",
+              required: false,
               schema: { type: "integer", example: 3 },
             },
           ],
@@ -416,8 +529,8 @@ const swaggerOptions = {
             {
               name: "qty",
               in: "query",
-              description: "Cantidad de pedidos a simular",
-              required: true,
+              description: "Cantidad de pedidos a simular (1 a 100, por defecto 10)",
+              required: false,
               schema: { type: "integer", example: 2 },
             },
           ],
@@ -459,8 +572,8 @@ const swaggerOptions = {
             {
               name: "qty",
               in: "query",
-              description: "Cantidad de elementos base para el seeding",
-              required: true,
+              description: "Cantidad de elementos base para el seeding (1 a 100, por defecto 10)",
+              required: false,
               schema: { type: "integer", example: 5 },
             },
           ],

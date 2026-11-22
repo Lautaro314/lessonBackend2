@@ -1,9 +1,14 @@
 const ProductModel = require("../models/product.model.js");
 
 class ProductRepository {
-  async findAll(filters = {}) {
+  async findPaginated(filters = {}, { skip, limit }) {
     // Encapsula el filtro por defecto de no eliminados
-    return await ProductModel.find({ isDeleted: false, ...filters }).lean();
+    const query = { isDeleted: false, ...filters };
+    const [items, total] = await Promise.all([
+      ProductModel.find(query).sort({ _id: -1 }).skip(skip).limit(limit).lean(),
+      ProductModel.countDocuments(query),
+    ]);
+    return { items, total };
   }
 
   async findById(id) {

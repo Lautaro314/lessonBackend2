@@ -9,9 +9,10 @@ const {
 } = require("../controllers/auth.controller");
 const { validateRegister } = require("../middleware/validate.middleware");
 const passport = require("../config/passport");
+const logger = require("../config/logger.config.js");
 
 router.use((req, res, next) => {
-    console.log(`Acceso a ${req.originalUrl}`);
+    logger.debug(`Acceso a ${req.originalUrl}`);
     next();
 });
 

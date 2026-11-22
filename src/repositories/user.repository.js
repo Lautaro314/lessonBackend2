@@ -1,10 +1,18 @@
 const UserModel = require("../models/user.model.js");
 
 class UserRepository {
-  async findAll(filters = {}) {
-    return await UserModel.find({ isDeleted: false, ...filters })
-      .select("-password")
-      .lean();
+  async findPaginated(filters = {}, { skip, limit }) {
+    const query = { isDeleted: false, ...filters };
+    const [items, total] = await Promise.all([
+      UserModel.find(query)
+        .select("-password")
+        .sort({ _id: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      UserModel.countDocuments(query),
+    ]);
+    return { items, total };
   }
 
   async findById(id) {

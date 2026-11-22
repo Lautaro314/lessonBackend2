@@ -42,12 +42,10 @@ const logFormat = winston.format.combine(
 );
 
 
-const currentEnv = config.mode || process.env.NODE_ENV || "development";
-
 const transportsList = [
   
   new winston.transports.Console({
-    level: currentEnv === "production" ? "info" : "debug",
+    level: config.logLevel,
     format: winston.format.combine(
       winston.format.colorize({ all: true }),
       logFormat

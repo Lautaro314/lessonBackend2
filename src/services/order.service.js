@@ -1,9 +1,16 @@
 const orderRepository = require("../repositories/order.repository.js");
-const { ORDER_STATUS } = require("../constants/index.js");
+const { ORDER_STATUS, ORDER_PRIORITY } = require("../constants/index.js");
 const { ERROR_TYPES } = require("../constants/error.enums.js");
 const CustomError = require("../utils/errors/custom-error.js");
 const { buildFileMetadata, removeUploadedFile } = require("../utils/file.util.js");
+const { buildSafeFilters } = require("../utils/query-filters.util.js");
 const logger = require("../config/logger.config.js");
+
+const ORDER_FILTERS = Object.freeze({
+  user: "objectId",
+  status: Object.values(ORDER_STATUS),
+  priority: Object.values(ORDER_PRIORITY),
+});
 
 const calculateTotalPrice = (items = []) => {
   return items.reduce((total, item) => total + item.price * item.quantity, 0);
@@ -15,8 +22,9 @@ const validateStatus = (status) => {
   }
 };
 
-const getOrders = async () => {
-  return await orderRepository.findAll();
+const getOrders = async (query, pagination) => {
+  const filters = buildSafeFilters(query, ORDER_FILTERS);
+  return await orderRepository.findPaginated(filters, pagination);
 };
 
 const createOrder = async (orderData) => {

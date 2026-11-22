@@ -1,10 +1,11 @@
 const userService = require("../services/user.service.js");
+const { sendPaginated } = require("../utils/pagination.util.js");
 
 class UserController {
   getUsers = async (req, res, next) => {
     try {
-      const users = await userService.getAllUsers(req.query);
-      res.status(200).json({ status: "success", payload: users });
+      const result = await userService.getAllUsers(req.query, req.pagination);
+      sendPaginated(res, result, req.pagination);
     } catch (error) {
       next(error);
     }

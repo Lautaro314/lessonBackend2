@@ -3,7 +3,7 @@ const { Strategy: JwtStrategy, ExtractJwt } = require("passport-jwt");
 const UserModel = require("../models/user.model");
 const { AUTH_COOKIE_NAME } = require("../utils/authCookie");
 
-require("dotenv").config();
+const config = require("./env.config.js");
 require("../strategies/local.strategy");
 require("../strategies/google.strategy");
 
@@ -19,7 +19,7 @@ const jwtOptions = {
         ExtractJwt.fromAuthHeaderAsBearerToken(),
         cookieExtractor,
     ]),
-    secretOrKey: process.env.JWT_SECRET,
+    secretOrKey: config.jwtSecret,
 };
 
 passport.use(

@@ -3,11 +3,12 @@ const router = express.Router();
 const { spawn, exec } = require("child_process")
 
 const { blockingTask, delegatedTask } = require("../controllers/process.controller");
+const logger = require("../config/logger.config.js");
 
 
 // middleware local
 router.use((req, res, next) => {
-    console.log(`Acceso a ${req.originalUrl}`);
+    logger.debug(`Acceso a ${req.originalUrl}`);
     next();
 });
 

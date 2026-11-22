@@ -1,9 +1,10 @@
 const orderService = require("../services/order.service");
+const { sendPaginated } = require("../utils/pagination.util.js");
 
 const getOrders = async (req, res, next) => {
     try {
-        const orders = await orderService.getOrders();
-        res.json({ status: "success", payload: orders });
+        const result = await orderService.getOrders(req.query, req.pagination);
+        sendPaginated(res, result, req.pagination);
     } catch (error) {
         next(error);
     }

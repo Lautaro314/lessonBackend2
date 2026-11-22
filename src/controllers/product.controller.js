@@ -1,11 +1,12 @@
 // src/controllers/product.controller.js
 const productService = require("../services/product.service.js");
+const { sendPaginated } = require("../utils/pagination.util.js");
 
 class ProductController {
   getProducts = async (req, res, next) => {
     try {
-      const products = await productService.getAllProducts(req.query);
-      res.status(200).json({ status: "success", payload: products });
+      const result = await productService.getAllProducts(req.query, req.pagination);
+      sendPaginated(res, result, req.pagination);
     } catch (error) {
       next(error);
     }

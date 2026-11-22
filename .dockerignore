@@ -1,0 +1,30 @@
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Secretos y entornos (siempre se inyectan al contenedor desde afuera)
+.env
+.env.*
+!.env.example
+
+# VCS y documentación del repo
+.git/
+.gitignore
+README.md
+RESUMEN.md
+
+# Generados en runtime
+logs/
+*.log
+uploads/
+uploads-test/
+coverage/
+.nyc_output/
+tmp/
+*.tmp
+*.swp
+.DS_Store
+
+# Los tests se ejecutan fuera de la imagen de producción
+test/
+.mocharc.json
